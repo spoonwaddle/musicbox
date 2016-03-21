@@ -1,15 +1,48 @@
 <!doctype html>
 <html>
-    <head><title>music box</title></head>
+    <head>
+        <style> body { background-color: #121212; } </style>
+        <title>music box</title></head>
     <body>
-        <canvas id="music-box-visualizer"></canvas>
+        <canvas id="music-box-visualizer" height=800 width=800></canvas>
         <script>
-            
-            function createOscillator(frequency, audio) {
-                var oscillator = audio.createOscillator();
-                oscillator.frequency.value = frequency;
-                return oscillator;
-            }
+
+            var NOTES = [ { frequency:  440.00, color: 0x3E00E5 },
+                          { frequency:  466.16, color: 0x5100E3 },
+                          { frequency:  493.88, color: 0x6400E2 },
+                          { frequency:  523.25, color: 0x7700E1 },
+                          { frequency:  554.37, color: 0x8900E0 },
+                          { frequency:  587.33, color: 0x9C00DF },
+                          { frequency:  622.25, color: 0xAE00DE },
+                          { frequency:  659.25, color: 0xC000DD },
+                          { frequency:  698.46, color: 0xD200DC },
+                          { frequency:  739.99, color: 0xDB00D1 },
+                          { frequency:  783.99, color: 0xDA00BE },
+                          { frequency:  830.61, color: 0xD900AA },
+                          { frequency:  880.00, color: 0xD70097 },
+                          { frequency:  932.33, color: 0xD60084 },
+                          { frequency:  987.77, color: 0xD50071 },
+                          { frequency: 1046.50, color: 0xD4005E },
+                          { frequency: 1108.73, color: 0xD3004B },
+                          { frequency: 1174.66, color: 0xD20039 },
+                          { frequency: 1244.51, color: 0xD10026 },
+                          { frequency: 1318.51, color: 0xD00014 },
+                          { frequency: 1396.91, color: 0xCF0002 },
+                          { frequency: 1479.98, color: 0xCE0E00 },
+                          { frequency: 1567.98, color: 0xCD2000 },
+                          { frequency: 1661.22, color: 0xCC3100 },
+                          { frequency: 1760.00, color: 0xCA4200 },
+                          { frequency: 1864.66, color: 0xC95300 },
+                          { frequency: 1975.53, color: 0xC86400 },
+                          { frequency: 2093.00, color: 0xC77500 },
+                          { frequency: 2217.46, color: 0xC68500 },
+                          { frequency: 2349.32, color: 0xC59500 },
+                          { frequency: 2489.02, color: 0xC4A500 },
+                          { frequency: 2637.02, color: 0xC3B500 },
+                          { frequency: 2793.83, color: 0xBFC200 },
+                          { frequency: 2959.96, color: 0xADC100 },
+                          { frequency: 3135.96, color: 0x9CC000 },
+                          { frequency: 3322.44, color: 0x8ABF00 }];
 
             function ADSRplayer(attackDuration,
                                 maxGain,
@@ -55,7 +88,7 @@
 
             }
             
-            function playForever(audio, graphics, frequency, msUntilNextPlay, position) {
+            function playForever(audio, graphics, frequency, playNote, msUntilNextPlay) {
                 
                 function play() {
 
@@ -67,41 +100,48 @@
                 setInterval(play, msUntilNextPlay);
 
             }
-
-            var ATTACK_DURATION = .05,
-                MAX_GAIN = 1,
-                DECAY_DURATION = .15,
-                SUSTAIN_GAIN = .3,
-                SUSTAIN_DURATION = 0,
-                RELEASE_DURATION = 1;
-
-            var NOTES = [ 
-                440.00,  466.16,  493.88,  523.25,  554.37,  587.33,  622.25,  659.25,  698.46,  739.99,  783.99,  830.61,
-                880.00,  932.33,  987.77, 1046.50, 1108.73, 1174.66, 1244.51, 1318.51, 1396.91, 1479.98, 1567.98, 1661.22,
-               1760.00, 1864.66, 1975.53, 2093.00, 2217.46, 2349.32, 2489.02, 2637.02, 2793.83, 2959.96, 3135.96, 3322.44
-            ];
-
-            var audio = new AudioContext(),
-                canvas = document.getElementById('music-box-visualizer'),
-                graphics = canvas.getContext('2d');
             
-            var playNote = ADSRplayer(
-                ATTACK_DURATION,
-                MAX_GAIN,
-                DECAY_DURATION,
-                SUSTAIN_GAIN,
-                SUSTAIN_DURATION,
-                RELEASE_DURATION);
-
-            for (var i=NOTES.length-1; i>=0; i-=2) {
-                
-                var playsPerMinute = (i + 1) / .4 ,
-                    msBetweenPlays = 60000 / playsPerMinute,
-                    frequency = NOTES[i];
-                
-                playForever(audio, graphics, frequency, msBetweenPlays);
-            
+            function createOscillator(frequency, audio) {
+                var oscillator = audio.createOscillator();
+                oscillator.frequency.value = frequency;
+                return oscillator;
             }
+
+            function main() {
+           
+                var ATTACK_DURATION = .05,
+                    MAX_GAIN = 1,
+                    DECAY_DURATION = .15,
+                    SUSTAIN_GAIN = .3,
+                    SUSTAIN_DURATION = 0,
+                    RELEASE_DURATION = 1;
+                    
+                var audio = new AudioContext(),
+                    canvas = document.getElementById('music-box-visualizer'),
+                    graphics = canvas.getContext('2d');
+                
+                var playNote = ADSRplayer(
+                    ATTACK_DURATION,
+                    MAX_GAIN,
+                    DECAY_DURATION,
+                    SUSTAIN_GAIN,
+                    SUSTAIN_DURATION,
+                    RELEASE_DURATION);
+
+                for (var i=NOTES.length-1; i>=0; i-=2) {
+                    
+                    var playsPerMinute = (i + 1) / .4 ,
+                        msBetweenPlays = 60000 / playsPerMinute,
+                        frequency = NOTES[i].frequency;
+                    
+                    playForever(audio, graphics, frequency, playNote, msBetweenPlays);
+
+                }
+
+            }
+            
+            main();
+
         </script>
     </body>
 </html>

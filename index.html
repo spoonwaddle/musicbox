@@ -2,118 +2,107 @@
 <html>
     <head><title>music box</title></head>
     <body>
+        <canvas id="music-box-visualizer"></canvas>
         <script>
-
-            function interpolate(srcStart, srcEnd, targetStart, targetEnd, value) {
-                var norm = (value - srcStart) / (srcEnd - srcStart);
-                return norm * (targetEnd - targetStart) + targetStart;
+            
+            function createOscillator(frequency, audio) {
+                var oscillator = audio.createOscillator();
+                oscillator.frequency.value = frequency;
+                return oscillator;
             }
 
-
-            function ADSRR(attackDuration, maxGain, decayDuration, sustainLevel, sustainDuration, releaseDuration, restDuration) {
+            function ADSRplayer(attackDuration,
+                                maxGain,
+                                decayDuration,
+                                sustainGain,
+                                sustainDuration,
+                                releaseDuration) {
                 
-                /* gain function for periodically playing a note.
-                   one play of a note is divided into five phases: attack, decay, sustain, release, rest.
-                   pretty much the same thing as ASDR, but with a rest phase added before playing the note again. */
-                
-                var decayStart = attackDuration,
-                    sustainStart = decayStart + decayDuration,
-                    releaseStart = sustainStart + sustainDuration,
-                    restStart = releaseStart + releaseDuration,
-                    playDuration = restStart + restDuration;
+                /* creates a function that plays an oscillator with a specific attack-decay-sustain-release envelope */
 
-                var gainAt = function(timeSinceStart) {
+                return function playNote(oscillator) {
 
-                    var playOffset = timeSinceStart % playDuration;
-                    
-                    if (playOffset <= decayStart) {
-                        // attack phase
-                        return interpolate(0, attackDuration, 0, maxGain, playOffset);
-                    } 
-                        
-                    else if ((playOffset >= decayStart) && (playOffset < sustainStart)) {
-                        // decay phase
-                        return interpolate(decayStart, sustainStart, maxGain, sustainLevel, playOffset);
-                    }
+                    var audio = oscillator.context;
 
-                    else if ((playOffset >= sustainStart) && (playOffset < releaseStart)) {
-                        //sustain phase
-                        return sustainLevel;
-                    }
-
-                    else if ((playOffset >= releaseStart) && (playOffset < restStart)) {
-                        // release phase
-                        return interpolate(releaseStart, restStart, sustainLevel, 0, playOffset);
-                    }
-
-                    else {
-                        // rest phase
-                        return 0;
-                    }
-                }
-                return gainAt;
-            }
-
-            function playNoteForever(oscillator, restPeriod) {
-                var ctx = oscillator.context;
-                var gainNode = ctx.createGain();
-                var playInterval = 5,
-                    gainAt = ADSRR(50, 8, 50, 4.8, 800, 500, restPeriod),
-                    startTime = new Date().getTime();
-
-                    setInterval(function () { gainNode.gain.value = gainAt( new Date().getTime() - startTime ) });
+                    var gainNode = audio.createGain();
+                    gainNode.gain.setValueAtTime(0, audio.currentTime);
 
                     oscillator.connect(gainNode);
-                    gainNode.connect(ctx.destination);
-
+                    gainNode.connect(audio.destination);
+                    
                     oscillator.start();
+
+                    var attackStart = 0,
+                        attackEnd = attackStart + attackDuration,
+                        decayEnd = attackEnd + decayDuration,
+                        sustainEnd = decayEnd + sustainDuration,
+                        releaseEnd = sustainEnd + releaseDuration;
+                     
+                    gainNode.gain.linearRampToValueAtTime(maxGain, audio.currentTime + attackDuration);  // attack
+                    gainNode.gain.linearRampToValueAtTime(sustainGain, audio.currentTime + decayEnd);    // decay
+                    gainNode.gain.linearRampToValueAtTime(sustainGain, audio.currentTime + sustainEnd);  // sustain
+                    gainNode.gain.linearRampToValueAtTime(0, audio.currentTime + releaseEnd);            // release
+                    
+                    setTimeout(function() {
+                        oscillator.stop(0);
+                        oscillator.disconnect(gainNode);
+                        gainNode.disconnect(audio.destination);
+                    }, (releaseEnd - attackStart) * 1000);
+                  
+                }
+
+                return playNote;
+
+            }
+            
+            function playForever(audio, graphics, frequency, msUntilNextPlay, position) {
+                
+                function play() {
+
+                    var oscillator = createOscillator(frequency, audio);
+                    playNote(oscillator);
+                
+                }
+                play();
+                setInterval(play, msUntilNextPlay);
+
             }
 
-            var notes = [
-                440.00,
-                466.16,
-                493.88,
-                523.25,
-                554.37,
-                587.33,
-                622.25,
-                659.25,
-                698.46,
-                739.99,
-                783.99,
-                830.61,
-                880.00,
-                932.33,
-                987.77,
-                1046.50,
-                1108.73,
-                1174.66,
-                1244.51,
-                1318.51,
-                1396.91,
-                1479.98,
-                1567.98,
-                1661.22,
-                1760.00,
-                1864.66,
-                1975.53,
-                2093.00,
-                2217.46,
-                2349.32,
-                2489.02,
-                2637.02,
-                2793.83,
-                2959.96,
-                3135.96,
-                3322.44
-            ]; 
+            var ATTACK_DURATION = .05,
+                MAX_GAIN = 1,
+                DECAY_DURATION = .15,
+                SUSTAIN_GAIN = .3,
+                SUSTAIN_DURATION = 0,
+                RELEASE_DURATION = 1;
 
-            var ctx = new AudioContext();
+            var NOTES = [ 
+                440.00,  466.16,  493.88,  523.25,  554.37,  587.33,  622.25,  659.25,  698.46,  739.99,  783.99,  830.61,
+                880.00,  932.33,  987.77, 1046.50, 1108.73, 1174.66, 1244.51, 1318.51, 1396.91, 1479.98, 1567.98, 1661.22,
+               1760.00, 1864.66, 1975.53, 2093.00, 2217.46, 2349.32, 2489.02, 2637.02, 2793.83, 2959.96, 3135.96, 3322.44
+            ];
 
-            for (i=0; i<36; i++) {
-                var osc = ctx.createOscillator();
-                osc.frequency.value = notes[i];
-                playNoteForever(osc, i * 500);
+            var audio = new AudioContext(),
+                canvas = document.getElementById('music-box-visualizer'),
+                graphics = canvas.getContext('2d');
+            
+            var playNote = ADSRplayer(
+                ATTACK_DURATION,
+                MAX_GAIN,
+                DECAY_DURATION,
+                SUSTAIN_GAIN,
+                SUSTAIN_DURATION,
+                RELEASE_DURATION);
+
+            
+
+            for (var i=NOTES.length-1; i>=0; i-=2) {
+                
+                var playsPerMinute = (i + 1) / .4 ,
+                    msBetweenPlays = 60000 / playsPerMinute,
+                    frequency = NOTES[i];
+                
+                playForever(audio, graphics, frequency, msBetweenPlays);
+            
             }
         </script>
     </body>

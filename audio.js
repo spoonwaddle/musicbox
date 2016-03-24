@@ -12,16 +12,16 @@ var AUDIO = {
     gainAt: function( note, time ) {
         
         var attackStart = 0,
-            attackEnd = 50,
-            decayEnd = 200,
-            sustainEnd = 202,
-            releaseEnd = 1202,
+            attackEnd = .05,
+            decayEnd = .3,
+            sustainEnd = .5,
+            releaseEnd = 1,
             maxGain = 1,
             minGain = 0,
             sustainGain = .3;
         
         
-        var t = time % note.period;
+        var t = ( time % note.period ) / note.period;
         var gain = 0;
 
         if ( t < attackEnd ) {

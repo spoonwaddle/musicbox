@@ -7,39 +7,39 @@
     <script>
 
         var notes = [{ pitch: 3322.44, color: '#8ABF00', period:  1000 },
-                     //{ pitch: 3135.96, color: '#9CC000', period:  2000 },
+                     { pitch: 3135.96, color: '#9CC000', period:  2000 },
                      { pitch: 2959.96, color: '#ADC100', period:  3000 },
-                     //{ pitch: 2793.83, color: '#BFC200', period:  4000 },
+                     { pitch: 2793.83, color: '#BFC200', period:  4000 },
                      { pitch: 2637.02, color: '#C3B500', period:  5000 },
-                     //{ pitch: 2489.02, color: '#C4A500', period:  6000 },
+                     { pitch: 2489.02, color: '#C4A500', period:  6000 },
                      { pitch: 2349.32, color: '#C59500', period:  7000 },
-                     //{ pitch: 2217.46, color: '#C68500', period:  8000 },
+                     { pitch: 2217.46, color: '#C68500', period:  8000 },
                      { pitch: 2093.00, color: '#C77500', period:  9000 },
-                     //{ pitch: 1975.53, color: '#C86400', period: 10000 },
+                     { pitch: 1975.53, color: '#C86400', period: 10000 },
                      { pitch: 1864.66, color: '#C95300', period: 11000 },
-                     //{ pitch: 1760.00, color: '#CA4200', period: 12000 },
+                     { pitch: 1760.00, color: '#CA4200', period: 12000 },
                      { pitch: 1661.22, color: '#CC3100', period: 13000 },
-                     //{ pitch: 1567.98, color: '#CD2000', period: 14000 },
+                     { pitch: 1567.98, color: '#CD2000', period: 14000 },
                      { pitch: 1479.98, color: '#CE0E00', period: 15000 },
-                    // { pitch: 1396.91, color: '#CF0002', period: 16000 },
+                     { pitch: 1396.91, color: '#CF0002', period: 16000 },
                      { pitch: 1318.51, color: '#D00014', period: 17000 },
-                    // { pitch: 1244.51, color: '#D10026', period: 18000 },
+                     { pitch: 1244.51, color: '#D10026', period: 18000 },
                      { pitch: 1174.66, color: '#D20039', period: 19000 },
-                     //{ pitch: 1108.73, color: '#D3004B', period: 20000 },
+                     { pitch: 1108.73, color: '#D3004B', period: 20000 },
                      { pitch: 1046.50, color: '#D4005E', period: 21000 },
-                    // { pitch:  987.77, color: '#D50071', period: 22000 },
+                     { pitch:  987.77, color: '#D50071', period: 22000 },
                      { pitch:  932.33, color: '#D60084', period: 23000 },
-                    // { pitch:  880.00, color: '#D70097', period: 24000 },
+                     { pitch:  880.00, color: '#D70097', period: 24000 },
                      { pitch:  830.61, color: '#D900AA', period: 25000 },
-                    // { pitch:  783.99, color: '#DA00BE', period: 26000 },
+                     { pitch:  783.99, color: '#DA00BE', period: 26000 },
                      { pitch:  739.99, color: '#DB00D1', period: 27000 },
-                    // { pitch:  698.46, color: '#D200DC', period: 28000 },
+                     { pitch:  698.46, color: '#D200DC', period: 28000 },
                      { pitch:  659.25, color: '#C000DD', period: 29000 },
-                    //{ pitch:  622.25, color: '#AE00DE', period: 30000 },
+                     { pitch:  622.25, color: '#AE00DE', period: 30000 },
                      { pitch:  587.33, color: '#9C00DF', period: 31000 },
-                    // { pitch:  554.37, color: '#8900E0', period: 32000 },
+                     { pitch:  554.37, color: '#8900E0', period: 32000 },
                      { pitch:  523.25, color: '#7700E1', period: 33000 },
-                    // { pitch:  493.88, color: '#6400E2', period: 34000 },
+                     { pitch:  493.88, color: '#6400E2', period: 34000 },
                      { pitch:  466.16, color: '#5100E3', period: 35000 },
                      { pitch:  440.00, color: '#3E00E5', period: 36000 }];
 
@@ -62,7 +62,7 @@
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             play( t );
             VISUALS.drawNotesAtTime( canvas, notes, t);
-            t += 100;
+            t += 20;
 
         });
     </script>

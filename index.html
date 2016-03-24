@@ -1,107 +1,70 @@
 <!doctype html>
 <html>
-    <head><title>music box</title></head>
-    <body>
-        <canvas id="music-box-visualizer"></canvas>
-        <script>
-            
-            function createOscillator(frequency, audio) {
-                var oscillator = audio.createOscillator();
-                oscillator.frequency.value = frequency;
-                return oscillator;
-            }
+    <body style="background-color: #000; margin: 0">
+    <canvas id='hey' style="display: block; background-color=#000;"></canvas>
+    <script src='visuals.js'></script>
+    <script src='audio.js'></script>
+    <script>
 
-            function ADSRplayer(attackDuration,
-                                maxGain,
-                                decayDuration,
-                                sustainGain,
-                                sustainDuration,
-                                releaseDuration) {
-                
-                /* creates a function that plays an oscillator with a specific attack-decay-sustain-release envelope */
+        var notes = [{ pitch: 3322.44, color: '#8ABF00', period:  1000 },
+                     //{ pitch: 3135.96, color: '#9CC000', period:  2000 },
+                     { pitch: 2959.96, color: '#ADC100', period:  3000 },
+                     //{ pitch: 2793.83, color: '#BFC200', period:  4000 },
+                     { pitch: 2637.02, color: '#C3B500', period:  5000 },
+                     //{ pitch: 2489.02, color: '#C4A500', period:  6000 },
+                     { pitch: 2349.32, color: '#C59500', period:  7000 },
+                     //{ pitch: 2217.46, color: '#C68500', period:  8000 },
+                     { pitch: 2093.00, color: '#C77500', period:  9000 },
+                     //{ pitch: 1975.53, color: '#C86400', period: 10000 },
+                     { pitch: 1864.66, color: '#C95300', period: 11000 },
+                     //{ pitch: 1760.00, color: '#CA4200', period: 12000 },
+                     { pitch: 1661.22, color: '#CC3100', period: 13000 },
+                     //{ pitch: 1567.98, color: '#CD2000', period: 14000 },
+                     { pitch: 1479.98, color: '#CE0E00', period: 15000 },
+                    // { pitch: 1396.91, color: '#CF0002', period: 16000 },
+                     { pitch: 1318.51, color: '#D00014', period: 17000 },
+                    // { pitch: 1244.51, color: '#D10026', period: 18000 },
+                     { pitch: 1174.66, color: '#D20039', period: 19000 },
+                     //{ pitch: 1108.73, color: '#D3004B', period: 20000 },
+                     { pitch: 1046.50, color: '#D4005E', period: 21000 },
+                    // { pitch:  987.77, color: '#D50071', period: 22000 },
+                     { pitch:  932.33, color: '#D60084', period: 23000 },
+                    // { pitch:  880.00, color: '#D70097', period: 24000 },
+                     { pitch:  830.61, color: '#D900AA', period: 25000 },
+                    // { pitch:  783.99, color: '#DA00BE', period: 26000 },
+                     { pitch:  739.99, color: '#DB00D1', period: 27000 },
+                    // { pitch:  698.46, color: '#D200DC', period: 28000 },
+                     { pitch:  659.25, color: '#C000DD', period: 29000 },
+                    //{ pitch:  622.25, color: '#AE00DE', period: 30000 },
+                     { pitch:  587.33, color: '#9C00DF', period: 31000 },
+                    // { pitch:  554.37, color: '#8900E0', period: 32000 },
+                     { pitch:  523.25, color: '#7700E1', period: 33000 },
+                    // { pitch:  493.88, color: '#6400E2', period: 34000 },
+                     { pitch:  466.16, color: '#5100E3', period: 35000 },
+                     { pitch:  440.00, color: '#3E00E5', period: 36000 }];
 
-                return function playNote(oscillator) {
+        canvas = document.getElementById('hey');
+        ctx = canvas.getContext('2d');
 
-                    var audio = oscillator.context;
+        draw = function () {
 
-                    var gainNode = audio.createGain();
-                    gainNode.gain.setValueAtTime(0, audio.currentTime);
+            canvas.height = window.innerHeight;
+            canvas.width = window.innerWidth;
 
-                    oscillator.connect(gainNode);
-                    gainNode.connect(audio.destination);
-                    
-                    oscillator.start();
+        };
+        draw();
+        var play = AUDIO.createPlayer( notes );
+        window.onresize = draw;
 
-                    var attackStart = 0,
-                        attackEnd = attackStart + attackDuration,
-                        decayEnd = attackEnd + decayDuration,
-                        sustainEnd = decayEnd + sustainDuration,
-                        releaseEnd = sustainEnd + releaseDuration;
-                     
-                    gainNode.gain.linearRampToValueAtTime(maxGain, audio.currentTime + attackDuration);  // attack
-                    gainNode.gain.linearRampToValueAtTime(sustainGain, audio.currentTime + decayEnd);    // decay
-                    gainNode.gain.linearRampToValueAtTime(sustainGain, audio.currentTime + sustainEnd);  // sustain
-                    gainNode.gain.linearRampToValueAtTime(0, audio.currentTime + releaseEnd);            // release
-                    
-                    setTimeout(function() {
-                        oscillator.stop(0);
-                        oscillator.disconnect(gainNode);
-                        gainNode.disconnect(audio.destination);
-                    }, (releaseEnd - attackStart) * 1000);
-                  
-                }
+        t = 0;
+        setInterval(function() {
 
-                return playNote;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            play( t );
+            VISUALS.drawNotesAtTime( canvas, notes, t);
+            t += 100;
 
-            }
-            
-            function playForever(audio, graphics, frequency, msUntilNextPlay, position) {
-                
-                function play() {
-
-                    var oscillator = createOscillator(frequency, audio);
-                    playNote(oscillator);
-                
-                }
-                play();
-                setInterval(play, msUntilNextPlay);
-
-            }
-
-            var ATTACK_DURATION = .05,
-                MAX_GAIN = 1,
-                DECAY_DURATION = .15,
-                SUSTAIN_GAIN = .3,
-                SUSTAIN_DURATION = 0,
-                RELEASE_DURATION = 1;
-
-            var NOTES = [ 
-                440.00,  466.16,  493.88,  523.25,  554.37,  587.33,  622.25,  659.25,  698.46,  739.99,  783.99,  830.61,
-                880.00,  932.33,  987.77, 1046.50, 1108.73, 1174.66, 1244.51, 1318.51, 1396.91, 1479.98, 1567.98, 1661.22,
-               1760.00, 1864.66, 1975.53, 2093.00, 2217.46, 2349.32, 2489.02, 2637.02, 2793.83, 2959.96, 3135.96, 3322.44
-            ];
-
-            var audio = new AudioContext(),
-                canvas = document.getElementById('music-box-visualizer'),
-                graphics = canvas.getContext('2d');
-            
-            var playNote = ADSRplayer(
-                ATTACK_DURATION,
-                MAX_GAIN,
-                DECAY_DURATION,
-                SUSTAIN_GAIN,
-                SUSTAIN_DURATION,
-                RELEASE_DURATION);
-
-            for (var i=NOTES.length-1; i>=0; i-=2) {
-                
-                var playsPerMinute = (i + 1) / .4 ,
-                    msBetweenPlays = 60000 / playsPerMinute,
-                    frequency = NOTES[i];
-                
-                playForever(audio, graphics, frequency, msBetweenPlays);
-            
-            }
-        </script>
+        });
+    </script>
     </body>
 </html>
